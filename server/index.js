@@ -8,17 +8,35 @@ app.use(cores());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cores: {
-    origins: "*:*",
-    methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET, POST, PUT, DELETE, PATCH, OPTIONS"],
   },
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected", socket.id);
-  socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
+  socket.on("join", ({ room, id, user }) => {
+    socket.join(room);
+
+    // socket.to(room).emit("message", { name:'Majid', msg: 'joined' });
+    io.to(room).emit("message", { user: user, msg: "joined" });
   });
+
+  socket.on("message", ({ user, msg, room }) => {
+    socket.to(room).emit("message", { user, msg, room });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(socket.id);
+  });
+
+  /*   socket.on("update item", (arg1, arg2, callback) => {
+    console.log(arg1); // 1
+    console.log(arg2); // { name: "updated" }
+    callback({
+      status: "ok",
+    });
+  }); */
 });
 
 server.listen(3001, () => {
