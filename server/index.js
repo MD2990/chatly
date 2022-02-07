@@ -15,11 +15,16 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("join", ({ room, id, user }) => {
-    socket.join(room);
+  socket.on("bye", ({ room, user }) => {
+    console.log('im Bye');
+    socket.to(room).emit("l", { name:'Majid Ahmed' });
+    socket.leave(room);
 
-    // socket.to(room).emit("message", { name:'Majid', msg: 'joined' });
-    io.to(room).emit("message", { user: user, msg: "joined" });
+  });
+
+  socket.on("join", ({ room, user }) => {
+    socket.join(room);
+    socket.to(room).emit("message", { user: user, msg: "joined" });
   });
 
   socket.on("message", ({ user, msg, room }) => {
@@ -27,7 +32,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(socket.id);
+    console.log("des: ", socket.id);
   });
 
   /*   socket.on("update item", (arg1, arg2, callback) => {
