@@ -1,8 +1,8 @@
 import Head from "next/head";
-import Chat from '../components/Main';
 import RoomAndId from "../components/RoomAndUser";
+import io from "socket.io-client";
 
-
+    const socket = io.connect("http://localhost:3001");
 export default function Home() {
   return (
     <div>
@@ -12,7 +12,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <RoomAndId/>
+      <RoomAndId io={socket}/>
     </div>
   );
 }

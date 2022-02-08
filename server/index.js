@@ -16,19 +16,18 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   socket.on("bye", ({ room, user }) => {
-    console.log('im Bye');
-    socket.to(room).emit("l", { name:'Majid Ahmed' });
+    io.to(room).emit("get", { user, msg: "Left" });
     socket.leave(room);
-
+    socket.disconnect();
   });
 
   socket.on("join", ({ room, user }) => {
     socket.join(room);
-    socket.to(room).emit("message", { user: user, msg: "joined" });
+    io.to(room).emit("get", { user: user, msg: "joined" });
   });
 
-  socket.on("message", ({ user, msg, room }) => {
-    socket.to(room).emit("message", { user, msg, room });
+  socket.on("message", (data) => {
+    io.to(data.room).emit("get", data);
   });
 
   socket.on("disconnect", () => {

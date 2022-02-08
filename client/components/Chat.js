@@ -4,44 +4,53 @@ import { useSnapshot } from "valtio";
 import { Center, VStack, Input, Button, Text, HStack } from "@chakra-ui/react";
 import state from "../stor";
 import { useRouter } from "next/router";
-function Chat() {
+function Chat({ io,user,room }) {
   const snap = useSnapshot(state);
   const router = useRouter();
   const socketRef = useRef();
   const chatRef = useRef();
-
+  
+  console.log(io);
   useEffect(() => {
-  //  snap.room === null && router.replace("/");
-    socketRef.current = io.connect("http://localhost:3001");
+    io.on("get", (data) => {
+       state.msg.push(data);
+    });
+      
+    /*   //  snap.room === null && router.replace("/");
+    io = io.connect("http://localhost:3001");
 
-    socketRef.current.on("connect", () => {
-    socketRef.current.on("message", ({ user, msg }) => {
+    io.on("connect", () => {
+    io.on("message", ({ user, msg }) => {
       state.msg.push({ user, msg });
     });
-    socketRef.current.on("l", (data) => {
+    io.on("l", (data) => {
       //state.msg.push({ user, msg });
       console.log('ok',data);
     });
      });
-    return () => socketRef.current.disconnect();
-  }, [snap.msg, snap.room]);
+    */
+
+      return () => io.disconnect();
+  }, [io]);
 
   const onMessageSubmit = async () => {
-    await socketRef.current.emit("message", {
+    const data = {
       msg: chatRef.current.value,
-      room: snap.room,
-      user: snap.user,
-    });
+      room: room,
+      user: user,
+    };
+    await io.emit("message", data);
+  
   };
 
-  const chatHandleKeyPress = (event) => {
+  /*   const chatHandleKeyPress = (event) => {
     if (event.key === "Enter") {
       onMessageSubmit();
     }
   };
-
+ */
   const exitTheChat = () => {
-    socketRef.current.emit("bye", {
+    io.emit("bye", {
       room: snap.room,
       user: snap.user,
     });
@@ -58,7 +67,7 @@ function Chat() {
         <Input
           ref={chatRef}
           placeholder="chat"
-          onKeyPress={chatHandleKeyPress}
+          /*    onKeyPress={chatHandleKeyPress} */
           onChange={(e) => (chatRef.current.value = e.target.value)}
         />
 

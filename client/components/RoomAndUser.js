@@ -1,65 +1,63 @@
 import React, { useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
 import { useSnapshot } from "valtio";
 import { Center, VStack, Input, Button, Text, HStack } from "@chakra-ui/react";
 import state from "../stor";
 import { useRouter } from "next/router";
-function Chat() {
+import Chat from "./Chat";
+function RoomAndUser({ io }) {
   const snap = useSnapshot(state);
-  const socketRef = useRef();
+
   const chatRef = useRef();
   const roomRef = useRef();
   const userRef = useRef();
 
   const router = useRouter();
 
+  /* 
   useEffect(() => {
-    socketRef.current = io.connect("http://localhost:3001");
-    /* 
-    socketRef.current.on("connect", () => {
+        io.on("get", (data) => {
+          console.log('data');
+         
+        });
+
+    io.on("connect", () => {
    
  
-    }); */
-    //  return () => socketRef.current.disconnect();
-  }, [socketRef.current]);
+    }); 
+    //  return () => io.disconnect();
+  }, [io]);*/
 
-  const onMessageSubmit = async () => {
-    await socketRef.current.emit("message", {
+  /*   const onMessageSubmit = async () => {
+    await io.emit("message", {
       msg: chatRef.current.value,
       room: roomRef.current.value,
       user: userRef.current.value,
     });
-  };
+  }; */
 
   const onRoomSubmit = async (e) => {
-
     e.preventDefault();
-     await socketRef.current.emit("join", {
+    await io.emit("join", {
       room: roomRef.current.value,
       user: userRef.current.value,
-    }); 
-        socketRef.current.on("message", ({ user, msg }) => {
-          state.msg.push({ user, msg });
-        });
+    });
 
-        state.user = userRef.current.value;
-        state.room = roomRef.current.value;
-   router.push(`/chat`);
-   
+
+    state.user = userRef.current.value;
+    state.room = roomRef.current.value;
+    //router.push(`/chat`);
   };
 
-  const roomHandleKeyPress = (event) => {
+  /*  const roomHandleKeyPress = (event) => {
     if (event.key === "Enter") {
       onMessageSubmit();
     }
   };
-
+ */
   return (
     <Center mt="10%">
-
-      
       <VStack>
-        <form onSubmit={(e)=>onRoomSubmit(e)}>
+        <form onSubmit={(e) => onRoomSubmit(e)}>
           <Input
             required
             ref={roomRef}
@@ -74,12 +72,14 @@ function Chat() {
           />
 
           <HStack>
-            <Button type="submit" >join</Button>
+            <Button type="submit">join</Button>
           </HStack>
         </form>
       </VStack>
+
+      <Chat io={io} room={roomRef.current?.value} user={userRef.current?.value} />
     </Center>
   );
 }
 
-export default Chat;
+export default RoomAndUser;
