@@ -2,30 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSnapshot } from "valtio";
 import { Center, VStack, Input, Button, Text, HStack } from "@chakra-ui/react";
 import state from "../stor";
-import { useRouter } from "next/router";
 import Chat from "./Chat";
+
+
 function RoomAndUser({ io }) {
-  const snap = useSnapshot(state);
+ 
+ // const snap = useSnapshot(state);
 
   const chatRef = useRef();
   const roomRef = useRef();
   const userRef = useRef();
-
-  const router = useRouter();
+  useEffect(() => {
+    io.on("get", (data) => {
+      console.log(data);
+    });
+  }, [io]); 
+  
 
   /* 
-  useEffect(() => {
-        io.on("get", (data) => {
-          console.log('data');
-         
-        });
 
-    io.on("connect", () => {
-   
- 
-    }); 
-    //  return () => io.disconnect();
-  }, [io]);*/
 
   /*   const onMessageSubmit = async () => {
     await io.emit("message", {
@@ -35,16 +30,19 @@ function RoomAndUser({ io }) {
     });
   }; */
 
-  const onRoomSubmit = async (e) => {
+  const onRoomSubmit = (e) => {
     e.preventDefault();
-    await io.emit("join", {
+    io.emit("join", {
       room: roomRef.current.value,
       user: userRef.current.value,
     });
 
+/*     state.user = userRef.current.value;
+    state.room = roomRef.current.value; */
 
-    state.user = userRef.current.value;
-    state.room = roomRef.current.value;
+
+
+    // router.push("/chat");
     //router.push(`/chat`);
   };
 
@@ -56,7 +54,8 @@ function RoomAndUser({ io }) {
  */
   return (
     <Center mt="10%">
-      <VStack>
+    
+       <VStack>
         <form onSubmit={(e) => onRoomSubmit(e)}>
           <Input
             required
@@ -75,9 +74,15 @@ function RoomAndUser({ io }) {
             <Button type="submit">join</Button>
           </HStack>
         </form>
+
+       
       </VStack>
 
-      <Chat io={io} room={roomRef.current?.value} user={userRef.current?.value} />
+      <Chat
+        io={io}
+        getRoom={roomRef.current?.value}
+        getUser={userRef.current?.value}
+      /> 
     </Center>
   );
 }
