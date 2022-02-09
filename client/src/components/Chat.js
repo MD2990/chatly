@@ -5,7 +5,6 @@ import ScrollToBottom from "react-scroll-to-bottom";
 function Chat({ socket, username, room }) {
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
-  const [user, setUser] = useState([]);
   const [loggedOutUsers, setloggedOutUsers] = useState([]);
   const [loggedInUsers, setloggedInUsers] = useState([]);
   const [online, setOnline] = useState(0);
@@ -36,21 +35,20 @@ function Chat({ socket, username, room }) {
     socket.on("receive_message", (data) => {
       setMessageList((list) => [...list, data]);
     });
-    socket.on("login", (data) => {
+    /*   socket.on("login", (data) => {
       setUser((list) => [...list, data]);
-    });
+    }); */
 
     socket.on("online", (data) => {
       setOnline(data.users);
-      const onlineUsers = data.username.filter((u) => u !== username);
+      //  const onlineUsers = data.username.filter((u) => u !== username);
 
       const unique = [...new Set(data.username)];
 
       setloggedInUsers(unique);
-      console.log("unique: ", typeof loggedInUsers);
     });
-    socket.on("getOnline", (data) => {
-      console.log("im getonline: ", data.users);
+       socket.on("error", (data) => {
+      alert('error');
     });
     socket.on("logout", (data) => {
       setloggedOutUsers((list) => [...list, data]);
@@ -78,7 +76,7 @@ function Chat({ socket, username, room }) {
                 Welcome {username} You Joined {room} Group{" "}
               </Text>
             }
-            {user &&
+            {/*       {user &&
               user.map((u, i) => (
                 <Text key={i} textAlign={"center"} fontSize={"xs"}>
                   <Text
@@ -93,7 +91,7 @@ function Chat({ socket, username, room }) {
                   </Text>{" "}
                   Joined{" "}
                 </Text>
-              ))}
+              ))} */}
 
             {loggedInUsers.map((u, i) => (
               <Text
@@ -106,8 +104,8 @@ function Chat({ socket, username, room }) {
                 }
               >
                 {u.toUpperCase() === username.toUpperCase()
-                  ? "You"
-                  : u.toUpperCase()}
+                  ? "You Joined"
+                  : `${u.toUpperCase()} Joined`}
               </Text>
             ))}
 

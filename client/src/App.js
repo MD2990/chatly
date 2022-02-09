@@ -10,25 +10,26 @@ function App() {
   const [room, setRoom] = useState("");
   const [showChat, setShowChat] = useState(false);
 
-
-
-/*     useEffect(() => {
-    
-      socket.on("login", (data) => {
-        console.log(data);
-        
+  useEffect(() => {
+    socket.on("login", (data) => {
+      setShowChat(true);
+    });
+      socket.on("error", (data) => {
+        alert(data.message);
       });
-     
-      return () => socket.disconnect();
-    }, [socket]); */
+
+    
+
+    return () => socket.disconnect();
+  }, [socket]);
   const joinRoom = () => {
     if (username !== "" && room !== "") {
-      const data={username, room};
+      const data = { username, room };
       socket.emit("join_room", data);
-      socket.emit("getOnline", data);
-    
+      socket.emit("online", data);
+   
 
-      setShowChat(true);
+    
     }
   };
 

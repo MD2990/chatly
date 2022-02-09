@@ -16,21 +16,28 @@ const io = new Server(server, {
 let users = [];
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
-    users.push({ user: data.username, room: data.room, id: socket.id });
+    const checkUserName = users.findIndex(
+      (u) => u.user.toLowerCase().trim() === data.username.toLowerCase().trim()
+    );
+    console.log(checkUserName);
+    if (checkUserName === -1) {
+      users.push({ user: data.username, room: data.room, id: socket.id });
 
-    socket.join(data.room);
-    socket.to(data.room).emit("login", { user: data.username });
+      socket.join(data.room);
+      io.to(data.room).emit("login", { user: data.username });
+      //io.to(data.room).emit("u", { user: data.username });
+    } else {
+      socket.emit("error", { message: "Username already taken" });
+      //socket.to(data.room).emit("error", { message: "Username already taken" });
+    }
   });
 
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data);
   });
-  socket.on("getOnline", (data) => {
+  socket.on("online", (data) => {
     const countUsers = users.filter((user) => user.room === data.room);
     const allUsers = countUsers.map((user) => user.user);
-
-    console.log("im getonline: ", allUsers);
-
     io.to(data.room).emit("online", {
       users: countUsers.length - 1,
       username: allUsers,
@@ -40,8 +47,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const room = users.find((user) => user.id === socket.id);
     users = users.filter((user) => user.id !== socket.id);
-
-    console.log(room?.room || "no room");
 
     room?.room &&
       socket.to(room.room).emit("online", { users: users.length - 1 });
