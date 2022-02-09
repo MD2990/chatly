@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+/* import React, { useEffect, useRef, useState } from "react";
 import { useSnapshot } from "valtio";
 import { Center, VStack, Input, Button, Text, HStack } from "@chakra-ui/react";
 import state from "../stor";
@@ -12,12 +12,12 @@ function RoomAndUser({ io }) {
   const chatRef = useRef();
   const roomRef = useRef();
   const userRef = useRef();
-  useEffect(() => {
+/*   useEffect(() => {
     io.on("get", (data) => {
       console.log(data);
     });
-  }, [io]); 
-  
+    return () => io.disconnect();
+  }, [io]);  */
 
   /* 
 
@@ -28,17 +28,21 @@ function RoomAndUser({ io }) {
       room: roomRef.current.value,
       user: userRef.current.value,
     });
-  }; */
+  }; 
 
   const onRoomSubmit = (e) => {
     e.preventDefault();
-    io.emit("join", {
+     io.emit("join_room", {
+       room: roomRef.current.value,
+       user: userRef.current.value,
+     }); 
+     io.emit("getOnline", {
       room: roomRef.current.value,
       user: userRef.current.value,
-    });
+    }); 
 
-/*     state.user = userRef.current.value;
-    state.room = roomRef.current.value; */
+    state.user = userRef.current.value;
+    state.room = roomRef.current.value; 
 
 
 
@@ -46,12 +50,12 @@ function RoomAndUser({ io }) {
     //router.push(`/chat`);
   };
 
-  /*  const roomHandleKeyPress = (event) => {
+   const roomHandleKeyPress = (event) => {
     if (event.key === "Enter") {
       onMessageSubmit();
     }
   };
- */
+ 
   return (
     <Center mt="10%">
     
@@ -88,3 +92,4 @@ function RoomAndUser({ io }) {
 }
 
 export default RoomAndUser;
+ */

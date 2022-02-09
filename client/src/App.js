@@ -12,7 +12,7 @@ function App() {
 
 
 
-    useEffect(() => {
+/*     useEffect(() => {
     
       socket.on("login", (data) => {
         console.log(data);
@@ -20,11 +20,12 @@ function App() {
       });
      
       return () => socket.disconnect();
-    }, [socket]);
+    }, [socket]); */
   const joinRoom = () => {
     if (username !== "" && room !== "") {
       const data={username, room};
       socket.emit("join_room", data);
+      socket.emit("getOnline", data);
     
 
       setShowChat(true);
