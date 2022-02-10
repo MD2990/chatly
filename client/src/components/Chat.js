@@ -1,14 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Center, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
+import { BiLogOutCircle } from "react-icons/bi";
+import { MdSend } from "react-icons/md";
+
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
 import ScrollToBottom from "react-scroll-to-bottom";
-import { proxy, useSnapshot } from "valtio";
+import { useSnapshot } from "valtio";
 import state from "../stor";
 function Chat({ socket, username, room }) {
-  //const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [loggedOutUsers, setloggedOutUsers] = useState([]);
-  const [loggedInUsers, setloggedInUsers] = useState([]);
-  const [online, setOnline] = useState(0);
 
   const currentMessage = useRef("");
 
@@ -43,77 +52,108 @@ function Chat({ socket, username, room }) {
     socket.on("receive_message", (data) => {
       setMessageList((list) => [...list, data]);
     });
-    /*   socket.on("login", (data) => {
-      setUser((list) => [...list, data]);
-    }); */
 
     socket.on("online", (data) => {
-      setOnline(data.users);
-      //  const onlineUsers = data.username.filter((u) => u !== username);
-
-      const unique = [...new Set(data.username)];
-      // const onlineUsers = loggedInUsers.filter((u) => u !== "");
-      state.onlineUsers.push(unique);
-
-      // state.onlineUsers = state.onlineUsers.push({ user: arr });
-
-      // setloggedInUsers( arr);
-      console.log("loggedInUsers", state.onlineUsers);
+      state.onlineUsers = data.username;
     });
     socket.on("error", (data) => {
       alert("error");
     });
     socket.on("logout", (data) => {
-
       setloggedOutUsers((list) => [...list, data]);
-      const allOnlineUsers = state.filter((u) => u !== data.username);
-      state.onlineUsers = allOnlineUsers;
-      //setloggedInUsers(onlineUsers);
+      state.onlineUsers = state.onlineUsers.filter((u) => u !== data.user);
     });
 
     return () => socket.disconnect();
   }, [socket]);
 
   return (
-    <HStack justify={"center"} justifyContent="flex-start" align={"flex-start"}>
-      <HStack border={"solid "} p="2">
-        <Box>
-          {snap.onlineUsers.length}
-          {/*     <Text>Total Online Users {online}</Text>
-          {loggedInUsers.map((u, i) => (
-            <Text key={i} textAlign="left">
-              {u.user.toUpperCase() === username.toUpperCase()
-                ? null
-                : `${u.user.toUpperCase()}`}
-            </Text>
-          ))} */}
-        </Box>
-        {/*       <Box>
-          <Text>Online Users</Text>
-          {loggedInUsers.map((u, i) => (
-            <Text key={i} textAlign="left">
-              {u.toUpperCase() === username.toUpperCase()
-                ? null
-                : `${u.toUpperCase()}`}
-            </Text>
-          ))}
-        </Box> */}
-      </HStack>
-      <Box className="chat-window" m="4">
-        <Box className="chat-header">
+    <HStack
+      justify={"center"}
+      justifyContent="flex-start"
+      align={"flex-start"}
+      border="solid"
+      m="5"
+      p="5"
+    >
+      <HStack alignSelf={"flex-start"} align={"flex-start"}>
+        <Box
+          px="4"
+          textAlign={"left"}
+          fontSize={["xl", "2xl", "3xl", "4xl"]}
+          color={"twitter.500"}
+          fontWeight={"semibold"}
+          textShadow={`0px 0px 20px lightGray`}
+        >
           <Text>
-            Live Chat {"   "} Room: {room}
+            {snap.onlineUsers.length > 1
+              ? `Total Online Users ${snap.onlineUsers.length - 1}`
+              : "No Online Users"}
           </Text>
+          {snap.onlineUsers.length > 1 &&
+            snap.onlineUsers.map((u, i) => (
+              <Text color="blue.600" key={i} textAlign="left">
+                {u.toUpperCase() === username.toUpperCase()
+                  ? null
+                  : `${u.toUpperCase()}`}
+              </Text>
+            ))}
+        </Box>
+      </HStack>
+      <Box className="chat-window">
+        <Box
+          h="auto"
+          borderTopRadius={"lg"}
+          position="relative"
+          display="block"
+          color={"twitter.50"}
+          fontWeight="extrabold"
+          lineHeight="45px"
+          bg="twitter.500"
+        >
+          <HStack justify={"center"} align={"center"} spacing={[1, 2, 3]}>
+            <Text isTruncated>Live Chat at Room: {room}</Text>
+            <IconButton
+              pl={[4, 8, 12, 24]}
+              _focus={{ boxShadow: "none" }}
+              variant="unstyled"
+              aria-label="Logout"
+              icon={<BiLogOutCircle color="red" size={"1.5rem"} />}
+              onClick={() => {
+                socket.emit("exit", { room });
+                window.location.reload();
+              }}
+            />
+          </HStack>
         </Box>
         <Box className="chat-body">
           <ScrollToBottom className="message-container">
             {
               <Text
-                fontSize={"xx-small"}
-                fontWeight={"hairline"}
+                fontSize={"x-small"}
+                fontWeight="light"
+                fontStyle={"italic"}
                 textAlign={"center"}
               >
-                Welcome {username} You Joined {room} Group{" "}
+                Welcome{" "}
+                <Text
+                  as="span"
+                  fontSize={"sm"}
+                  fontWeight={"extrabold"}
+                  color={"green.300"}
+                >
+                  {username.toUpperCase()}
+                </Text>{" "}
+                {"  "}
+                You Joined Group {""}
+                <Text
+                  as="span"
+                  fontSize={"sm"}
+                  fontWeight={"extrabold"}
+                  color={"green.300"}
+                >
+                  {room}
+                </Text>{" "}
               </Text>
             }
 
@@ -142,8 +182,11 @@ function Chat({ socket, username, room }) {
                   id={username === messageContent.author ? "you" : "other"}
                 >
                   <Box>
-                    <Box className="message-content">
-                      <p>{messageContent.message}</p>
+                    <Box
+                      className="message-content"
+                      fontSize={["sm", "md", "lg", "xl"]}
+                    >
+                      <Text p="1">{messageContent.message}</Text>
                     </Box>
                     <Box className="message-meta">
                       <p id="time">{messageContent.time}</p>
@@ -161,13 +204,14 @@ function Chat({ socket, username, room }) {
         </Box>
 
         <HStack
-          border={"solid 1px "}
-          borderColor="#9ba2a5"
-          borderTop={"none"}
+          //boxShadow={["0px 0px 2px rgba(0, 0, 0, 0.25)"]}
+          boxShadow={["0px 0px 30px 0px #bcc3c5"]}
           borderBottomRadius="2xl"
         >
           <Textarea
-            minH={"4rem"}
+            fontSize={["sm", "md", "lg", "xl"]}
+            p="6"
+            minH={"8rem"}
             ref={currentMessage}
             placeholder="Type your message here..."
             /*       onChange={(event) => {
@@ -175,7 +219,7 @@ function Chat({ socket, username, room }) {
               //setCurrentMessage(event.target.value);
             }} */
             onKeyPress={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && socket.connected) {
                 sendMessage();
                 e.preventDefault();
               }
@@ -183,7 +227,16 @@ function Chat({ socket, username, room }) {
               //ss.current.setFocus();
             }}
           />
-          <button onClick={sendMessage}>&#9658;</button>
+          {/*   <button onClick={sendMessage}>&#9658;</button> */}
+
+          <IconButton
+            disabled={!socket.connected}
+            _focus={{ boxShadow: "none" }}
+            variant="unstyled"
+            aria-label="Send message"
+            icon={<MdSend color="lightGreen" size={"2.5rem"} />}
+            onClick={sendMessage}
+          />
         </HStack>
       </Box>
     </HStack>
