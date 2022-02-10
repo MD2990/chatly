@@ -19,7 +19,7 @@ io.on("connection", (socket) => {
     const checkUserName = users.findIndex(
       (u) => u.user.toLowerCase().trim() === data.username.toLowerCase().trim()
     );
-    console.log(checkUserName);
+  
     if (checkUserName === -1) {
       users.push({ user: data.username, room: data.room, id: socket.id });
 
