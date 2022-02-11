@@ -43,18 +43,19 @@ io.on("connection", (socket) => {
     const allUsers = countUsers.map((user) => user.user);
 
     io.to(data.room).emit("online", {
-      users: countUsers.length - 1,
+      
       username: allUsers,
+      users:countUsers
     });
   });
 
   socket.on("disconnect", () => {
-    const room = users.find((user) => user.id === socket.id);
+    const loggedOutUser = users.find((user) => user.id === socket.id);
     users = users.filter((user) => user.id !== socket.id);
     /* 
     room?.room &&
       socket.to(room.room).emit("online", { users: users.length - 1, username: users.user }); */
-    room?.room && socket.to(room.room).emit("logout", { user: room.user });
+    loggedOutUser?.room && socket.to(loggedOutUser.room).emit("logout",  loggedOutUser );
     console.log("User Disconnected", socket.id);
   });
 });

@@ -11,6 +11,8 @@ import {
   Text,
   Textarea,
   VStack,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { useSnapshot } from "valtio";
@@ -53,15 +55,16 @@ function Chat({ socket, username, room }) {
       setMessageList((list) => [...list, data]);
     });
 
-    socket.on("online", (data) => {
-      state.onlineUsers = data.username;
+    socket.on("online", ({ users }) => {
+      console.log(users);
+      state.onlineUsers = users;
     });
     socket.on("error", (data) => {
       alert("error");
     });
-    socket.on("logout", (data) => {
-      setloggedOutUsers((list) => [...list, data]);
-      state.onlineUsers = state.onlineUsers.filter((u) => u !== data.user);
+    socket.on("logout", (loggedOutUser) => {
+      setloggedOutUsers((list) => [...list, loggedOutUser]);
+      state.onlineUsers = state.onlineUsers.filter((u) => u.id !== loggedOutUser.id);
     });
 
     return () => socket.disconnect();
@@ -72,32 +75,65 @@ function Chat({ socket, username, room }) {
       justify={"center"}
       justifyContent="flex-start"
       align={"flex-start"}
-      border="solid"
       m="5"
       p="5"
     >
       <HStack alignSelf={"flex-start"} align={"flex-start"}>
-        <Box
-          px="4"
-          textAlign={"left"}
-          fontSize={["xl", "2xl", "3xl", "4xl"]}
-          color={"twitter.500"}
-          fontWeight={"semibold"}
-          textShadow={`0px 0px 20px lightGray`}
-        >
-          <Text>
+        <Box>
+          <Text
+            p="4"
+            textAlign={"left"}
+            fontSize={["md", "lg", "xl", "2xl"]}
+            color={"twitter.600"}
+            textDecor={"underline"}
+            fontWeight={"semibold"}
+            textShadow={`0px 0px 20px lightGray`}
+          >
             {snap.onlineUsers.length > 1
               ? `Total Online Users ${snap.onlineUsers.length - 1}`
               : "No Online Users"}
           </Text>
-          {snap.onlineUsers.length > 1 &&
-            snap.onlineUsers.map((u, i) => (
-              <Text color="blue.600" key={i} textAlign="left">
-                {u.toUpperCase() === username.toUpperCase()
-                  ? null
-                  : `${u.toUpperCase()}`}
-              </Text>
-            ))}
+          {snap.onlineUsers.length > 1 && (
+            <Wrap spacing={[0.5, 1, 2]} maxW="28rem">
+              {snap.onlineUsers.map((u, i) => (
+                <WrapItem
+                  key={u.id}
+                  onClick={() => console.log(u.id)}
+                  px={[0.1, 0.3, 0.6, 1]}
+                  w={["60px", "80px", "100px", "120px"]}
+                  h={["60px", "80px", "100px", "120px"]}
+                  lineHeight={["60px", "80px", "100px", "120px"]}
+                  borderRadius="50%"
+                  align="center"
+                  color="black"
+                  textAlign="center"
+                  bg={
+                    u.user.toUpperCase() === username.toUpperCase()
+                      ? "gray.50"
+                      : "blue.50"
+                  }
+                  verticalAlign="middle"
+                  display={"table-cell"}
+                >
+                  <Text
+                    isTruncated
+                    textAlign={"center"}
+                    fontSize={["xs", "sm", "md", "lg"]}
+                    color={
+                      u.user.toUpperCase() === username.toUpperCase()
+                        ? "gray.300"
+                        : "blue.500"
+                    }
+                    fontWeight={"medium"}
+                  >
+                    {u.user.toUpperCase() === username.toUpperCase()
+                      ? "You"
+                      : `${u.user.toUpperCase()}`}
+                  </Text>
+                </WrapItem>
+              ))}
+            </Wrap>
+          )}
         </Box>
       </HStack>
       <Box className="chat-window">
@@ -158,16 +194,16 @@ function Chat({ socket, username, room }) {
             }
 
             {loggedOutUsers &&
-              loggedOutUsers.map((u, i) => (
-                <Text key={i} textAlign={"center"} fontSize={"xs"}>
+              loggedOutUsers.map((u) => (
+                <Text key={u.id} textAlign={"center"} fontSize={"xs"} fontStyle={'italic'} >
                   <Text
                     textTransform={"uppercase"}
-                    fontSize={"lg"}
+                    fontSize={"sm"}
                     fontWeight={"black"}
                     as="span"
                     color={"green.300"}
+                   
                   >
-                    {" "}
                     {u.user}
                   </Text>{" "}
                   Left{" "}
