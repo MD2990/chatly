@@ -33,19 +33,23 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data);
+    socket.to(data.room).emit("stoppedTyping", data);
   });
   socket.on("exit", (room) => {
     socket.leave(room);
     socket.disconnect();
+  });
+  socket.on("typing", ({username,room} ) => {
+ 
+    io.to(room).emit("typing", ({user:username}));
   });
   socket.on("online", (data) => {
     const countUsers = users.filter((user) => user.room === data.room);
     const allUsers = countUsers.map((user) => user.user);
 
     io.to(data.room).emit("online", {
-      
       username: allUsers,
-      users:countUsers
+      users: countUsers,
     });
   });
 
@@ -55,7 +59,8 @@ io.on("connection", (socket) => {
     /* 
     room?.room &&
       socket.to(room.room).emit("online", { users: users.length - 1, username: users.user }); */
-    loggedOutUser?.room && socket.to(loggedOutUser.room).emit("logout",  loggedOutUser );
+    loggedOutUser?.room &&
+      socket.to(loggedOutUser.room).emit("logout", loggedOutUser);
     console.log("User Disconnected", socket.id);
   });
 });

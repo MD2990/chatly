@@ -19,7 +19,7 @@ import { useSnapshot } from "valtio";
 import state from "../stor";
 function Chat({ socket, username, room }) {
   const [messageList, setMessageList] = useState([]);
-  const [loggedOutUsers, setloggedOutUsers] = useState([]);
+  const [loggedOutUsers, setLoggedOutUsers] = useState([]);
 
   const currentMessage = useRef("");
 
@@ -50,7 +50,14 @@ function Chat({ socket, username, room }) {
   };
 
   useEffect(() => {
-    currentMessage.current.focus();
+    socket.on("typing", ({ user }) => {
+      user !== username && (state.isTyping = user);
+    });
+
+    socket.on("stoppedTyping", () => {
+      state.isTyping = null;
+    });
+
     socket.on("receive_message", (data) => {
       setMessageList((list) => [...list, data]);
     });
@@ -63,12 +70,14 @@ function Chat({ socket, username, room }) {
       alert("error");
     });
     socket.on("logout", (loggedOutUser) => {
-      setloggedOutUsers((list) => [...list, loggedOutUser]);
-      state.onlineUsers = state.onlineUsers.filter((u) => u.id !== loggedOutUser.id);
+      setLoggedOutUsers((list) => [...list, loggedOutUser]);
+      state.onlineUsers = state.onlineUsers.filter(
+        (u) => u.id !== loggedOutUser.id
+      );
     });
 
     return () => socket.disconnect();
-  }, [socket]);
+  }, [socket, username]);
 
   return (
     <HStack
@@ -147,14 +156,28 @@ function Chat({ socket, username, room }) {
           lineHeight="45px"
           bg="twitter.500"
         >
-          <HStack justify={"center"} align={"center"} spacing={[1, 2, 3]}>
-            <Text isTruncated>Live Chat at Room: {room}</Text>
+          <HStack
+          fontSize={["xs", "sm", "md", "lg"]}
+            justify={"space-between"}
+            align={"center"}
+            p="2"
+            spacing={[1, 2, 3]}
+            >
+            <Text   isTruncated 
+            fontSize={["xs", "sm",'md']}
+            
+            color={"red.100"}
+            
+            > {room}</Text>
+            <Text isTruncated>
+              {snap.isTyping && `${snap.isTyping} is Typing...`}{" "}
+            </Text>
             <IconButton
-              pl={[4, 8, 12, 24]}
               _focus={{ boxShadow: "none" }}
               variant="unstyled"
               aria-label="Logout"
-              icon={<BiLogOutCircle color="red" size={"1.5rem"} />}
+              color={"red.200"}
+              icon={<BiLogOutCircle size={"2rem"} />}
               onClick={() => {
                 socket.emit("exit", { room });
                 window.location.reload();
@@ -195,14 +218,18 @@ function Chat({ socket, username, room }) {
 
             {loggedOutUsers &&
               loggedOutUsers.map((u) => (
-                <Text key={u.id} textAlign={"center"} fontSize={"xs"} fontStyle={'italic'} >
+                <Text
+                  key={u.id}
+                  textAlign={"center"}
+                  fontSize={"xs"}
+                  fontStyle={"italic"}
+                >
                   <Text
                     textTransform={"uppercase"}
                     fontSize={"sm"}
                     fontWeight={"black"}
                     as="span"
                     color={"green.300"}
-                   
                   >
                     {u.user}
                   </Text>{" "}
@@ -240,7 +267,6 @@ function Chat({ socket, username, room }) {
         </Box>
 
         <HStack
-          //boxShadow={["0px 0px 2px rgba(0, 0, 0, 0.25)"]}
           boxShadow={["0px 0px 30px 0px #bcc3c5"]}
           borderBottomRadius="2xl"
         >
@@ -250,20 +276,16 @@ function Chat({ socket, username, room }) {
             minH={"8rem"}
             ref={currentMessage}
             placeholder="Type your message here..."
-            /*       onChange={(event) => {
-              currentMessage.current.value = event.target.value;
-              //setCurrentMessage(event.target.value);
-            }} */
             onKeyPress={(e) => {
+              socket.emit("typing", { room, username });
               if (e.key === "Enter" && socket.connected) {
+                state.isTyping = null;
                 sendMessage();
+
                 e.preventDefault();
               }
-
-              //ss.current.setFocus();
             }}
           />
-          {/*   <button onClick={sendMessage}>&#9658;</button> */}
 
           <IconButton
             disabled={!socket.connected}
