@@ -33,15 +33,16 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data);
+  });
+  socket.on("stoppedTyping", (data) => {
     socket.to(data.room).emit("stoppedTyping", data);
   });
   socket.on("exit", (room) => {
     socket.leave(room);
     socket.disconnect();
   });
-  socket.on("typing", ({username,room} ) => {
- 
-    io.to(room).emit("typing", ({user:username}));
+  socket.on("typing", ({ username, room }) => {
+    io.to(room).emit("typing", { user: username });
   });
   socket.on("online", (data) => {
     const countUsers = users.filter((user) => user.room === data.room);

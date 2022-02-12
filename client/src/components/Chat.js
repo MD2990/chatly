@@ -277,13 +277,26 @@ function Chat({ socket, username, room }) {
             ref={currentMessage}
             placeholder="Type your message here..."
             onKeyPress={(e) => {
-              socket.emit("typing", { room, username });
+              console.log(e.target.value.length);
               if (e.key === "Enter" && socket.connected) {
-                state.isTyping = null;
+                // state.isTyping = null;
                 sendMessage();
-
+                
                 e.preventDefault();
               }
+            }}
+            onFocus={(e) => {
+                socket.emit("typing", { room, username });
+                
+                
+              }}
+              
+              
+              onBlur={(e) => {
+              socket.emit("stoppedTyping", { room, username });
+
+
+
             }}
           />
 
