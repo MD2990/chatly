@@ -8,12 +8,12 @@ app.use(cors());
 const server = http.createServer(app);
 const PORT = process.env.PORT || 8080;
 const io = new Server(
-  server /* {
+  server  {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://chatly-client.vercel.app",
     methods: ["GET", "POST"],
   },
-} */
+} 
 );
 let users = [];
 io.on("connection", (socket) => {
