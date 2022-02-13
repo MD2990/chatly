@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 app.use(cors());
 
 const server = http.createServer(app);
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 const io = new Server(server, {
   cors: {
     origin: "https://chatly-client.vercel.app",
