@@ -4,13 +4,10 @@ import { MdSend } from "react-icons/md";
 
 import {
   Box,
-  Button,
-  Center,
   HStack,
   IconButton,
   Text,
   Textarea,
-  VStack,
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
@@ -45,7 +42,6 @@ function Chat({ socket, username, room }) {
       setMessageList((list) => [...list, messageData]);
       currentMessage.current.value = "";
       currentMessage.current.focus();
-      //setCurrentMessage("");
     }
   };
 
@@ -63,11 +59,10 @@ function Chat({ socket, username, room }) {
     });
 
     socket.on("online", ({ users }) => {
-      console.log(users);
       state.onlineUsers = users;
     });
-    socket.on("error", (data) => {
-      alert("error");
+    socket.on("error", ({ message }) => {
+      alert(message);
     });
     socket.on("logout", (loggedOutUser) => {
       setLoggedOutUsers((list) => [...list, loggedOutUser]);
@@ -130,14 +125,25 @@ function Chat({ socket, username, room }) {
                     fontSize={["xs", "sm", "md", "lg"]}
                     color={
                       u.user.toUpperCase() === username.toUpperCase()
-                        ? "gray.300"
+                        ? "gray.400"
                         : "blue.500"
                     }
                     fontWeight={"medium"}
                   >
-                    {u.user.toUpperCase() === username.toUpperCase()
-                      ? "You"
-                      : `${u.user.toUpperCase()}`}
+                    {u.user.toUpperCase() === username.toUpperCase() ? (
+                      <Text as="span" fontSize={"xs"} fontWeight={"bold"}>
+                        {u.user.toUpperCase()}{" "}
+                        <Text
+                          as="span"
+                          fontSize={"xx-small"}
+                          fontWeight={"hairline"}
+                        >
+                          {"(You)"}
+                        </Text>
+                      </Text>
+                    ) : (
+                      `${u.user.toUpperCase()}`
+                    )}
                   </Text>
                 </WrapItem>
               ))}
@@ -157,18 +163,16 @@ function Chat({ socket, username, room }) {
           bg="twitter.500"
         >
           <HStack
-          fontSize={["xs", "sm", "md", "lg"]}
+            fontSize={["xs", "sm", "md", "lg"]}
             justify={"space-between"}
             align={"center"}
             p="2"
             spacing={[1, 2, 3]}
-            >
-            <Text   isTruncated 
-            fontSize={["xs", "sm",'md']}
-            
-            color={"red.100"}
-            
-            > {room}</Text>
+          >
+            <Text isTruncated fontSize={["xs", "sm", "md"]} color={"red.100"}>
+              {" "}
+              {room}
+            </Text>
             <Text isTruncated>
               {snap.isTyping && `${snap.isTyping} is Typing...`}{" "}
             </Text>
@@ -215,7 +219,6 @@ function Chat({ socket, username, room }) {
                 </Text>{" "}
               </Text>
             }
-
             {loggedOutUsers &&
               loggedOutUsers.map((u) => (
                 <Text
@@ -236,7 +239,6 @@ function Chat({ socket, username, room }) {
                   Left{" "}
                 </Text>
               ))}
-
             {messageList.map((messageContent, i) => {
               return (
                 <Box
@@ -277,26 +279,17 @@ function Chat({ socket, username, room }) {
             ref={currentMessage}
             placeholder="Type your message here..."
             onKeyPress={(e) => {
-              console.log(e.target.value.length);
               if (e.key === "Enter" && socket.connected) {
-                // state.isTyping = null;
                 sendMessage();
-                
+
                 e.preventDefault();
               }
             }}
             onFocus={(e) => {
-                socket.emit("typing", { room, username });
-                
-                
-              }}
-              
-              
-              onBlur={(e) => {
+              socket.emit("typing", { room, username });
+            }}
+            onBlur={(e) => {
               socket.emit("stoppedTyping", { room, username });
-
-
-
             }}
           />
 

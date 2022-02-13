@@ -7,12 +7,14 @@ app.use(cors());
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
+const io = new Server(
+  server /* {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
   },
-});
+} */
+);
 let users = [];
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
@@ -46,10 +48,8 @@ io.on("connection", (socket) => {
   });
   socket.on("online", (data) => {
     const countUsers = users.filter((user) => user.room === data.room);
-    const allUsers = countUsers.map((user) => user.user);
 
     io.to(data.room).emit("online", {
-      username: allUsers,
       users: countUsers,
     });
   });

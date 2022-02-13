@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Chat from "./components/Chat";
 import { Button, Input, Text, Wrap, WrapItem } from "@chakra-ui/react";
 
-const socket = io.connect("http://localhost:3001");
+const socket = io.connect(process.env.server);
 
 function App() {
   const [username, setUsername] = useState("");
@@ -20,7 +20,7 @@ function App() {
     });
 
     return () => socket.disconnect();
-  }, [socket]);
+  }, []);
   const joinRoom = () => {
     if (username !== "" && room !== "") {
       const data = { username, room };
@@ -37,8 +37,7 @@ function App() {
           justify={"center"}
           spacing={[1, 2, 3]}
           color={"twitter.500"}
-          borderRadius={'lg'}
-          
+          borderRadius={"lg"}
           boxShadow={["md", "lg", "xl"]}
           textShadow={`0px 0px 10px lightgray`}
           p={[4, 8, 12, 24]}
