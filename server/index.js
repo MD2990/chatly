@@ -7,12 +7,16 @@ app.use(cors());
 
 const server = http.createServer(app);
 const PORT = process.env.PORT;
-const io = new Server(server, {
+
+app.use(cors());
+const io = new Server(
+  server /* , {
   cors: {
     origin: "https://chatly-client.vercel.app",
     methods: ["GET", "POST"],
-  },
-});
+  }, 
+}*/
+);
 let users = [];
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
