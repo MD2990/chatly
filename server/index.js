@@ -1,18 +1,24 @@
-const http = require("http");
 const express = require("express");
-const cors = require("cors");
-const socketIO = require("socket.io");
-
 const app = express();
-const PORT = process.env.PORT;
-
-
+const http = require("http");
+const cors = require("cors");
+const { Server } = require("socket.io");
 app.use(cors());
 
-
 const server = http.createServer(app);
+const PORT = process.env.PORT;
 
-const io = socketIO(server);
+const io = new Server(server, {
+  cors: {
+    origin: "https://chatly-three.vercel.app/",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+    maxAge: 3600,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  },
+});
 let users = [];
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
