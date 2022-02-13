@@ -10,7 +10,7 @@ const PORT = process.env.PORT;
 
 const io = new Server(server, {
   cors: {
-    origin: "chatly-client.vercel.app",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
