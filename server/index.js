@@ -12,11 +12,6 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false,
-    maxAge: 3600,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   },
 });
 let users = [];
