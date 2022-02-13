@@ -63,7 +63,9 @@ io.on("connection", (socket) => {
     console.log("User Disconnected", socket.id);
   });
 });
-
+app.get("/", (req, res) => {
+  res.send("Chatly Server ...");
+});
 server.listen(PORT, () => {
   console.log("SERVER RUNNING");
 });
