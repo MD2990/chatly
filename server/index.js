@@ -1,19 +1,18 @@
-const express = require("express");
-const app = express();
 const http = require("http");
+const express = require("express");
 const cors = require("cors");
-const { Server } = require("socket.io");
-app.use(cors());
+const socketIO = require("socket.io");
 
-const server = http.createServer(app);
+const app = express();
 const PORT = process.env.PORT;
 
-const io = new Server(server, {
-  cors: {
-    origin: "https://chatly-three.vercel.app/",
-    methods: ["GET", "POST"],
-  },
-});
+
+app.use(cors());
+
+
+const server = http.createServer(app);
+
+const io = socketIO(server);
 let users = [];
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
